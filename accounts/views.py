@@ -48,6 +48,13 @@ def dashboardgraph(request):
     }
     return render(request, 'dashboard/dashboard.html', context)
 
+def about_us(request):
+    user_type = request.user.user_type
+    context = {
+        'user_type': user_type
+    }
+    return render(request, 'dashboard/about_us.html', context)
+
 def logout_view(request):
     return render(request, 'authentications/login.html')
 
