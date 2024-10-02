@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login as auth_login
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -12,14 +12,15 @@ import csv
 def register_view(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
+        print(form)
         if form.is_valid():
             form.save()
-            return redirect('login')
+            #Swal.fire()
         else:
             print(form.errors)
     else:
         form = CustomUserCreationForm()
-    return render(request, 'authentications/registration.html', {'form': form})
+    return render(request, 'dashboard/create_account.html', {'form':form})
 
 def login_view(request):
     if request.method == 'POST':
@@ -49,7 +50,31 @@ def dashboardgraph(request):
     return render(request, 'dashboard/dashboard.html', context)
 
 def logout_view(request):
+    auth_logout(request)  # Logs the user out
     return render(request, 'authentications/login.html')
+
+def about_us(request):
+    user_type = request.user.user_type
+    context = {
+        'user_type': user_type
+    }
+    return render(request, 'dashboard/about_us.html',context)
+
+@login_required
+def create_account(request):
+    return render(request, 'dashboard/create_account.html')
+
+# Delete database
+def delete_data(request):
+    if request.method == 'POST':
+        if request.user.is_authenticated:
+            # Step 1: Clear existing data in the UploadCSV table
+            UploadCSV.objects.all().delete()
+            messages.success(request, "All data deleted successfully.")
+        else:
+            messages.error(request, "You are not authorized to delete data.")
+
+        return redirect('dashboard')  # Redirect to your dashboard or wherever appropriate
 
 @login_required
 def upload_csv(request):
